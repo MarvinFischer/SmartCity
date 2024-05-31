@@ -1,0 +1,17 @@
+{
+	"rabbitmq_host": "localhost",
+	"rabbitmq_channel": "sensors",
+	"sensors": [
+		{
+			"impl": "NormallyDistributedDeltaSensor",
+			"type_id": "temperature",
+			"instance_id": "indoor_0",
+			"unit": "celsius",
+			"val_min": 15,
+			"val_max": 30,
+			"val_init": 20,
+			"variance": 0.1
+		}
+	],
+	"poll_delay": 1
+}
