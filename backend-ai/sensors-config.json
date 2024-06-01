@@ -1,0 +1,9 @@
+{
+    "sensors": [
+    {
+        "typeId": "temperature",
+        "instanceId": "indoor_0",
+        "unit": "celsius"
+    }
+    ]
+}
