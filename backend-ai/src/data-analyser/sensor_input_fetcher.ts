@@ -27,12 +27,10 @@ class SensorInputFetcher{
                 }
                 channel.assertQueue(SensorInputFetcher.QUEUE, {
                     durable: false
-                });
-                console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", SensorInputFetcher.QUEUE);
+                });         
                 
                 channel.consume(SensorInputFetcher.QUEUE, function(msg: any) {
                     self.handleSensorInput(msg.content.toString());
-                //    console.log(" [x] Received %s", msg.content.toString());
                 }, {
                     noAck: true
                 });

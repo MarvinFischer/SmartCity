@@ -126,7 +126,6 @@ export default class Sensor {
         this.statistics.median = this.calculateMedian(this.history);
         this.statistics.q1 = this.calculateQ1(this.history);
         this.statistics.q3 = this.calculateQ3(this.history);
-        console.log(this.statistics);
     }
 
 }

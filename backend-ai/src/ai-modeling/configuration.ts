@@ -2,11 +2,17 @@ import { Iterations, State, StateTransition } from "./ai-components";
 import STATES from "./configuration/states";
 import TRANSISITIONS from "./configuration/transitions";
 import { AiConfiguration } from "./modelBuilder";
+import StateBuilder from "./configuration/stateBuilder";
 
 export default class Configuration {
 
 
     private getStates() {
+        const sb = new StateBuilder();
+        // build States
+
+        sb.build('sensors-config.json');
+
         return STATES.ALL_STATES;
     }
 

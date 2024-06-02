@@ -4,7 +4,7 @@ import STATES from "./states";
 export default class TRANSISITIONS {
 
     public static readonly START_TO_CHECK_DATE = new StateTransition(STATES.START, STATES.CHECK_DATE, new Map<string, any>(), (state: State<any>, iterations: Iterations) => {
-        return false;
+        return true;
     }
     );
 
