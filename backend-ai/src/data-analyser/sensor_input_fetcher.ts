@@ -52,12 +52,31 @@ class SensorInputFetcher{
 
 }
 
+interface AccumulatorAiRules{
+
+}
+
+
+class AiRules {
+    private accumators: any;
+
+    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiRules | null{
+        
+        if(!this.accumators || !this.accumators[accumulatorType]){
+            return null;
+        }
+        return this.accumators[accumulatorType][accumulatorId];
+    }
+}
+
 class SensorConfig{
 
     public readonly sensors: Sensor[];
+    public readonly aiRules: any;
 
-    constructor(sensors: Sensor[]){
+    constructor(sensors: Sensor[], aiRules: any = {}){
         this.sensors = sensors;
+        this.aiRules = aiRules;
     }
 
     /**
@@ -83,6 +102,10 @@ class SensorConfig{
     public getSensor(instanceId: string){ 
 
         return this.sensors.find(sensor => sensor.getInstanceId() === instanceId);
+    }
+
+    public getAiRules(accumulatorType: string, accumulatorId: string){
+        return this.aiRules[accumulatorType][accumulatorId];
     }
 
 }

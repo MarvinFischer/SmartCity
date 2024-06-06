@@ -1,3 +1,5 @@
+import { SensorConfig } from "../data-analyser/sensor_input_fetcher";
+
 class State<ValueType> {
 
     // name of the state
@@ -41,10 +43,10 @@ class StateTransition{
     private _start : State<any>;
     private _end : State<any>;
     private _newVars = new Map<string, any>();
-    private _condition : (state: State<any>, iterations: Iterations) => boolean;
+    private _condition : (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => boolean;
 
 
-    constructor(start: State<any>, end: State<any>, newVars: Map<string, any>, condition: (start: State<any>, iterations: Iterations) => boolean) {
+    constructor(start: State<any>, end: State<any>, newVars: Map<string, any>, condition: (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => boolean) {
         this._start = start;
         this._end = end;
         this._newVars = newVars;
@@ -63,15 +65,15 @@ class StateTransition{
         return this._newVars;
     }
     
-    public resolveCondition(iterations: Iterations) {
-        return this._condition(this.start, iterations);
+    public resolveCondition(varHisotry: VarHistory, sensorConfig: SensorConfig) {
+        return this._condition(this.start, varHisotry, sensorConfig);
     }
 }
 
 
 class Model {
     
-    constructor(private _states: State<any>[], private _transitions: StateTransition[]) {
+    constructor(private _states: State<any>[], private _transitions: StateTransition[], private _sensors: SensorConfig) {
     
     }
 
@@ -80,6 +82,10 @@ class Model {
      */
     get states() {
         return this._states;
+    }
+
+    get sensors() {
+        return this._sensors;
     }
 
     /**
@@ -92,6 +98,15 @@ class Model {
      
 }
 
+class VarHistory extends Map<string, any[]>{
+
+    constructor(){
+        super();
+    }
+
+    
+    
+}
 
 
 class Iterations{
@@ -100,7 +115,7 @@ class Iterations{
 
     private _model : Model;
     
-    private _varHistory: Map<string, any[]> = new Map<string, any[]>();
+    private _varHistory: VarHistory = new VarHistory();
 
     private _logEnabled = false;
 
@@ -168,7 +183,7 @@ class Iterations{
        // get possible transitions
         let possibleTransitions = this._model.transitions.filter(transition => transition.start.name === this._stateHistory[this._stateHistory.length - 1].name);
         // find the first transition that resolves to true
-        let resolvedTransition = possibleTransitions.find(transition => transition.resolveCondition(this));
+        let resolvedTransition = possibleTransitions.find(transition => transition.resolveCondition(this._varHistory, this._model.sensors));
         // set the new state
         if(resolvedTransition){
             this._stateHistory.push(resolvedTransition.end);
@@ -186,4 +201,4 @@ class Iterations{
 }
 
 
-export {Model, State, StateTransition, Iterations};
+export {Model, State, StateTransition, Iterations, VarHistory};

@@ -1,4 +1,5 @@
-import { StateTransition, State } from "../../ai-components";
+import { SensorConfig } from "../../../data-analyser/sensor_input_fetcher";
+import { StateTransition, State, Iterations, VarHistory } from "../../ai-components";
 import Accumulator from "../accumulator";
 
 export default class WindowAccumulator extends Accumulator{   
@@ -8,6 +9,9 @@ export default class WindowAccumulator extends Accumulator{
         super(name, globalStart);
     }
 
+    getType(): string {
+        return "window";
+    }
     entry(): string {
         return "CHECK_TEMP";
     }
@@ -21,27 +25,28 @@ export default class WindowAccumulator extends Accumulator{
                
         const trans :StateTransition[]  = [];
 
-        trans.push(new StateTransition(this.findState("CHECK_TEMP")!, this.findState("CHECK_HUMIDITY")!, new Map<string, any>(), (state: State<any>, iterations: any) => {
+        trans.push(new StateTransition(this.findState("CHECK_TEMP")!, this.findState("CHECK_HUMIDITY")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
+            const aiRules = this.getAiRules(sensorConfig);
             return false;
         }));
 
 
-        trans.push(new StateTransition(this.findState("CHECK_HUMIDITY")!, this.findState("CHECK_DATE")!, new Map<string, any>(), (state: State<any>, iterations: any) => {
+        trans.push(new StateTransition(this.findState("CHECK_HUMIDITY")!, this.findState("CHECK_DATE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
             return false;
         }));
 
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, iterations: any) => {
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
             return false;
         }));
 
         
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("CLOSING")!, new Map<string, any>(), (state: State<any>, iterations: any) => {
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("CLOSING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
             return false;
         }));
 
         // a transition from all substates to continue      
         this.getSubStates().forEach(subState => {
-            const t = new StateTransition(this.findState(subState)!, this.findState("CONTINUE")!, new Map<string, any>(), (state: State<any>, iterations: any) => {
+            const t = new StateTransition(this.findState(subState)!, this.findState("CONTINUE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
                 return state.name === globalStart.name;
             })
             trans.push(t);

@@ -1,13 +1,14 @@
+import { SensorConfig } from "../data-analyser/sensor_input_fetcher";
 import { Iterations, Model, State, StateTransition } from "./ai-components";
 
 class ModelBuilder {
-    buildModel(conf: AiConfiguration) {
-        return new Model(conf.states, conf.transitions);
+    buildModel(conf: AiConfiguration, sensorConfig: SensorConfig) {
+        return new Model(conf.states, conf.transitions, sensorConfig);
     }
 
-    runModel(conf: AiConfiguration){
+    runModel(conf: AiConfiguration, sensorConfig: SensorConfig){
         // build the model based on the configuration
-        let model = this.buildModel(conf);
+        let model = this.buildModel(conf, sensorConfig);
 
         let enableLog = conf.enableLog;
    
