@@ -7,14 +7,8 @@ import StateBuilder from "./configuration/stateBuilder";
 export default class Configuration {
 
 
-    private getStates() {
-        const sb = new StateBuilder();
-        // build States
 
-        sb.build('sensors-config.json');
 
-        return STATES.ALL_STATES;
-    }
 
     private initState(){
         return STATES.START;
@@ -34,18 +28,17 @@ export default class Configuration {
 
     }
 
-    private getTransitions() {
-        return TRANSISITIONS.ALL_TRANSITIONS;
-    }
-
     configure() : AiConfiguration  {
+        let stateBuilder = new StateBuilder();
+        let build = stateBuilder.build('sensors-config.json');
+       // console.log(build.transitions);
         return {
-            states: this.getStates(),
-            transitions: this.getTransitions(),
+            states: build.states,
+            transitions: build.transitions,
             ticker: this.ticker,
-            initState: this.initState()!,
+            initState: build.start,
             initValues: this.initValues(),
-            enableLog: false
+            enableLog: true
         }
     }
 

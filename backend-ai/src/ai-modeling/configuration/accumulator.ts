@@ -41,6 +41,7 @@ export default abstract class Accumulator {
 
     protected getAiRules(sensorConfig: SensorConfig) {
         const acc = sensorConfig.aiRules["accumulators"]
+        console.log("acc", sensorConfig);
         if(!acc) return null;
         const typedAcc = acc[this.getType()];
         if(!typedAcc) return null;
