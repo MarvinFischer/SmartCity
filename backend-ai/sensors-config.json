@@ -1,0 +1,81 @@
+{
+    "sensors": [
+    {
+        "typeId": "temperature",
+        "instanceId": "indoor_0",
+        "unit": "celsius"
+    }
+    ],
+    "aiRules": {        
+        "accumulators": {
+            "windows": {               
+                "window1": {
+                    "open": {
+                        "minTemp": {
+                            "value": 21,
+                            "sensors": [
+                                "indoor_0"
+                            ] 
+                        },
+                        "minHumidity": {
+                            "value": 50,
+                            "sensors": [
+                                
+                            ] 
+                        },
+                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                        "newVars": {
+                            "window1_opened": "true"
+                        }
+    
+                    },
+                    "close": {
+                        "maxTemp": {
+                            "value": 20,
+                            "sensors": [
+                                "indoor_0"
+                            ] 
+                        },
+                        "maxHumidity": 50,
+                        "newVars": {
+                            "window1_opened": "false"
+                        }
+                    }
+                },
+                "window2": {
+                    "open": {
+                        "minTemp": {
+                            "value": 21,
+                            "sensors": [
+                                "indoor_0"
+                            ] 
+                        },
+                        "minHumidity": {
+                            "value": 50,
+                            "sensors": [
+                                
+                            ] 
+                        },
+                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                        "newVars": {
+                            "window1_opened": "true"
+                        }
+    
+                    },
+                    "close": {
+                        "maxTemp": {
+                            "value": 20,
+                            "sensors": [
+                                "indoor_0"
+                            ] 
+                        },
+                        "maxHumidity": 50,
+                        "newVars": {
+                            "window1_opened": "false"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
