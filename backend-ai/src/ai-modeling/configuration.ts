@@ -1,14 +1,20 @@
 import { Iterations, State, StateTransition } from "./ai-components";
 import STATES from "./configuration/states";
-import TRANSISITIONS from "./configuration/transitions";
 import { AiConfiguration } from "./modelBuilder";
 import StateBuilder from "./configuration/stateBuilder";
 
 export default class Configuration {
 
+    private sb = new StateBuilder();
 
+   
 
+    private getStates() {
+      
+        this.sb.build('sensors-config.json');
 
+        return STATES.ALL_STATES;
+    }
 
     private initState(){
         return STATES.START;
@@ -28,17 +34,18 @@ export default class Configuration {
 
     }
 
+
     configure() : AiConfiguration  {
-        let stateBuilder = new StateBuilder();
-        let build = stateBuilder.build('sensors-config.json');
-       // console.log(build.transitions);
+
+        const build = this.sb.build('sensors-config.json');
+
         return {
             states: build.states,
             transitions: build.transitions,
             ticker: this.ticker,
-            initState: build.start,
+            initState: this.initState()!,
             initValues: this.initValues(),
-            enableLog: true
+            enableLog: false
         }
     }
 

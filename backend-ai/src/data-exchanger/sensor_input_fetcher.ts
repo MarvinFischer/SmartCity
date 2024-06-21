@@ -1,5 +1,6 @@
 import { json } from "body-parser";
 import Sensor from "./sensor";
+import Accumulator from "../ai-modeling/configuration/accumulator";
 
 class SensorInputFetcher{
 
@@ -52,31 +53,40 @@ class SensorInputFetcher{
 
 }
 
-interface AccumulatorAiRules{
+interface AccumulatorAiContextRules{
+    [key: string]: any;
+}
 
+interface AccumulatorAiRules{
+    accumulators: {
+        [key: string]: AccumulatorAiContextRules;
+    }
 }
 
 
 class AiRules {
-    private accumators: any;
+    private accumalators: {[key: string]: AccumulatorAiContextRules};
+    public constructor(accumalators : AccumulatorAiRules = {accumulators: {} }){
+        this.accumalators = accumalators.accumulators;
+    }
 
-    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiRules | null{
-        
-        if(!this.accumators || !this.accumators[accumulatorType]){
+    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiContextRules | null{
+        console.log(this.accumalators, accumulatorType, accumulatorId);
+        if(!this.accumalators || !this.accumalators[accumulatorType]){
             return null;
         }
-        return this.accumators[accumulatorType][accumulatorId];
+        return this.accumalators[accumulatorType][accumulatorId];
     }
 }
 
 class SensorConfig{
 
     public readonly sensors: Sensor[];
-    public readonly aiRules: any;
+    public readonly aiRules: AiRules;
 
-    constructor(sensors: Sensor[], aiRules: any = {}){
+    constructor(sensors: Sensor[], aiRules: AiRules|null = null){
         this.sensors = sensors;
-        this.aiRules = aiRules;
+        this.aiRules = aiRules ?? new AiRules();
     }
 
     /**
@@ -90,22 +100,26 @@ class SensorConfig{
         const data = fs.readFileSync(filePath, 'utf8');
         const jsonData = JSON.parse(data);
         const sensorsData = jsonData.sensors;
+        const aiRulesData = jsonData.aiRules;
 
         const sensors =  sensorsData.map ((sensor: any) => {          
             return new Sensor(sensor.typeId, sensor.instanceId, sensor.unit);
         });
+
+        let aiRules =new AiRules(aiRulesData);
+
+        
   
 
-        return new SensorConfig(sensors);
+        return new SensorConfig(sensors, aiRules);
     }
 
     public getSensor(instanceId: string){ 
-
         return this.sensors.find(sensor => sensor.getInstanceId() === instanceId);
     }
 
     public getAiRules(accumulatorType: string, accumulatorId: string){
-        return this.aiRules[accumulatorType][accumulatorId];
+        return this.aiRules.getAccumulator(accumulatorType,accumulatorId);
     }
 
 }

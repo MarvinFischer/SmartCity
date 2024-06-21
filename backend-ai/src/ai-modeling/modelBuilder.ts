@@ -1,4 +1,5 @@
-import { SensorConfig } from "../data-analyser/sensor_input_fetcher";
+import { AccumulatorInputSender } from "../data-exchanger/accumulator_input_sender";
+import { SensorConfig } from "../data-exchanger/sensor_input_fetcher";
 import { Iterations, Model, State, StateTransition } from "./ai-components";
 
 class ModelBuilder {
@@ -6,7 +7,7 @@ class ModelBuilder {
         return new Model(conf.states, conf.transitions, sensorConfig);
     }
 
-    runModel(conf: AiConfiguration, sensorConfig: SensorConfig){
+    runModel(conf: AiConfiguration, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender){
         // build the model based on the configuration
         let model = this.buildModel(conf, sensorConfig);
 
@@ -18,7 +19,7 @@ class ModelBuilder {
         }
 
         // setup the model instance
-        let iterations = new Iterations(model, conf.initValues, conf.initState, opts);
+        let iterations = new Iterations(model, conf.initValues, conf.initState, accumulatorInputSender, opts);
 
         // start the ticker
         conf.ticker(iterations);

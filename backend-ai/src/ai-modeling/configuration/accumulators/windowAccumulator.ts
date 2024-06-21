@@ -1,8 +1,16 @@
-import { SensorConfig } from "../../../data-analyser/sensor_input_fetcher";
+import { AccumulatorInputSender } from "../../../data-exchanger/accumulator_input_sender";
+import { SensorConfig } from "../../../data-exchanger/sensor_input_fetcher";
 import { StateTransition, State, Iterations, VarHistory } from "../../ai-components";
 import Accumulator from "../accumulator";
+import WindowConfig from "../configs/windowsConfig";
 
-export default class WindowAccumulator extends Accumulator{   
+export default class WindowAccumulator extends Accumulator{
+
+    private open = false;
+
+    getStateData() {
+        return {open: this.open};
+    }   
 
 
     constructor(name: string, globalStart: State<any>){
@@ -10,7 +18,7 @@ export default class WindowAccumulator extends Accumulator{
     }
 
     getType(): string {
-        return "window";
+        return "windows";
     }
     entry(): string {
         return "CHECK_TEMP";
@@ -25,29 +33,67 @@ export default class WindowAccumulator extends Accumulator{
                
         const trans :StateTransition[]  = [];
 
-        trans.push(new StateTransition(this.findState("CHECK_TEMP")!, this.findState("CHECK_HUMIDITY")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
-            const aiRules = this.getAiRules(sensorConfig);
-            const minTemp = 20;
-            const currentTemp = sensorConfig.getSensor("indoor_temperature_0")!.getStatistics().avg;
-            console.log("aiRules", aiRules);
-          //  console.log("aiRules", {minTemp, currentTemp});
-            return false;
+        trans.push(new StateTransition(this.findState("CHECK_TEMP")!, this.findState("CHECK_HUMIDITY")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+            
+
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
+            
+            const stateVarName = aiConfigRules.open.vars.stateVar;
+            const isOpen = this.isWindowOpen(varHisotry, stateVarName);
+
+            if(isOpen) return false;
+            
+            const minTemp = aiConfigRules.open.minTemp.value;
+            const tempSensor = aiConfigRules.open.minTemp.sensors;
+            const allSensorsMatchTemp = tempSensor.every(sensor => {
+                const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                return currentAvgTemp > minTemp;
+            });
+
+            return allSensorsMatchTemp;
         }));
 
 
-        trans.push(new StateTransition(this.findState("CHECK_HUMIDITY")!, this.findState("CHECK_DATE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
-            return false;
+        trans.push(new StateTransition(this.findState("CHECK_HUMIDITY")!, this.findState("CHECK_DATE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+            
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
+            
+            const stateVarName = aiConfigRules.open.vars.stateVar;
+            const isOpen = this.isWindowOpen(varHisotry, stateVarName);
+
+            if(isOpen) return false;
+            
+            const minHumidity = aiConfigRules.open.minHumidity.value;
+            const humSensors = aiConfigRules.open.minHumidity.sensors;
+            const allSensorsMatchTemp = humSensors.every(sensor => {
+                const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                return currentAvgHum > minHumidity;
+            });
+
+            return allSensorsMatchTemp;
         }));
 
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
-            return false;
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+            
+            // as current week day as full string
+            const currentWeekDay = new Date().getDay();
+            const dayString = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][currentWeekDay].toUpperCase();
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
+            const days = aiConfigRules.open.onlyOnDays.map(day => day.toUpperCase());
+            const open =  days.includes(dayString);
+            if(!open) return false;
+            this.open = true;           
+            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "OPEN", data: ""});
+            varHisotry.addVersion(aiConfigRules.open.vars.stateVar, true);
+            return true;
         }));
 
         
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("CLOSING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
-            
-            
-            return false;
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("CLOSING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+            // windows can be closed every day
+            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "CLOSE", data: ""});
+            this.open = false;
+            return true;
         }));
 
 
@@ -73,7 +119,7 @@ export default class WindowAccumulator extends Accumulator{
 
         // a transition from all substates to continue , alawys true to catch and continue    
         this.getSubStates().forEach(subState => {
-            const t = new StateTransition(this.findState(subState)!, this.findState("CONTINUE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig) => {
+            const t = new StateTransition(this.findState(subState)!, this.findState("CONTINUE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
                 return true;
             })
             trans.push(t);
@@ -83,6 +129,12 @@ export default class WindowAccumulator extends Accumulator{
 
         return trans;
     }
+    private isWindowOpen(varHisotry: VarHistory, stateVarName: string) {
+        const isOpenVarHisory = varHisotry.get(stateVarName) || [];
+        const isOpen = isOpenVarHisory.length > 0 ? isOpenVarHisory[isOpenVarHisory.length - 1] : false;
+        return isOpen;
+    }
+
     buildStates(): State<any>[] {
         const states = this.getSubStates().map(subState => {
             return new State(this.name.toUpperCase() + "_" + subState.toUpperCase(), subState);

@@ -1,4 +1,4 @@
-import { SensorConfig } from "./data-analyser/sensor_input_fetcher";
+import { SensorConfig } from "./data-exchanger/sensor_input_fetcher";
 
 export default class ApplicationContext {
 

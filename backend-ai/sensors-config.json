@@ -20,12 +20,12 @@
                         "minHumidity": {
                             "value": 50,
                             "sensors": [
-                                
+                                "indoor_huminidity_0"
                             ] 
                         },
                         "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                        "newVars": {
-                            "window1_opened": "true"
+                        "vars": {
+                            "stateVar": "window1_opened"
                         }
     
                     },
@@ -37,8 +37,8 @@
                             ] 
                         },
                         "maxHumidity": 50,
-                        "newVars": {
-                            "window1_opened": "false"
+                        "vars": {
+                            "stateVar": "window1_opened"
                         }
                     }
                 },
@@ -53,12 +53,12 @@
                         "minHumidity": {
                             "value": 50,
                             "sensors": [
-                                
+                                "indoor_huminidity_0"
                             ] 
                         },
                         "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                        "newVars": {
-                            "window1_opened": "true"
+                        "vars": {
+                            "stateVar": "window2_opened"
                         }
     
                     },
@@ -70,8 +70,8 @@
                             ] 
                         },
                         "maxHumidity": 50,
-                        "newVars": {
-                            "window1_opened": "false"
+                        "vars": {
+                            "stateVar": "window2_opened"
                         }
                     }
                 }
