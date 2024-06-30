@@ -40,13 +40,18 @@ class SensorInputFetcher{
     }
 
     private handleSensorInput(data: string){
-        const supportedTypes = ['temperature', 'humidity'];
+        const supportedSingleTypes = ['temperature', 'humidity'];
+        const weatherType = "temperature_humidity";
         const jsonData = JSON.parse(data);
         const instanceID = jsonData.instance_id;
         const sensor = this.sensorConfig.getSensor(instanceID);       
         if(sensor){
-            if(supportedTypes.findIndex(type => type === sensor.getTypeId()) !== -1){
-                sensor.updateValue(jsonData.value[sensor.getUnit()])
+            if(supportedSingleTypes.findIndex(type => type === sensor.getTypeId()) !== -1){
+                sensor.updateValue(jsonData.value[sensor.getUnit()[0]])
+            }else if(sensor.getTypeId() === weatherType){                
+                const temperature = jsonData.value[sensor.getUnit()[0]];
+                const humidity = jsonData.value[sensor.getUnit()[1]];     
+                sensor.updateValue([temperature, humidity]);     
             }
         }
     }
@@ -110,12 +115,10 @@ class SensorConfig{
         const aiRulesData = jsonData.aiRules;
 
         const sensors =  sensorsData.map ((sensor: any) => {          
-            return new Sensor(sensor.typeId, sensor.instanceId, sensor.unit);
+            return new Sensor(sensor.typeId, sensor.instanceId, sensor.unit, sensor.label);
         });
 
-        let aiRules =new AiRules(aiRulesData);
-
-        
+        let aiRules =new AiRules(aiRulesData);       
   
 
         return new SensorConfig(sensors, aiRules);

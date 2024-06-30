@@ -2,26 +2,27 @@ import { AccumulatorInputSender } from "../../../data-exchanger/accumulator_inpu
 import { SensorConfig } from "../../../data-exchanger/sensor_input_fetcher";
 import { StateTransition, State, Iterations, VarHistory } from "../../ai-components";
 import Accumulator from "../accumulator";
-import WindowConfig from "../configs/windowsConfig";
+import FanConfig from "../configs/fanConfig";
 
-export default class WindowAccumulator extends Accumulator{
+export default class FanAccumulator extends Accumulator{
 
-    private open = false;
+    private turnedOn = false;
 
     getStateData() {
-        return {open: this.open};
+        return {turnedOn: this.turnedOn};
     }   
 
     getName(): string {
         return this.name;
     }
 
+
     constructor(name: string, globalStart: State<any>){
         super(name, globalStart);
     }
 
     getType(): string {
-        return "windows";
+        return "fans";
     }
     entry(): string {
         return "CHECK_TEMP";
@@ -30,7 +31,7 @@ export default class WindowAccumulator extends Accumulator{
         return "CONTINUE";
     }
     getSubStates(): string[] {
-       return ["CHECK_TEMP", "CHECK_HUMIDITY", "CHECK_DATE", "OPENING", "CLOSING", "CONTINUE"];
+       return ["CHECK_TEMP", "CHECK_HUMIDITY", "CHECK_DATE", "TURNING_ON", "TURNING_OFF", "CONTINUE"];
     }
     buildTransition(nextAccumulator: Accumulator | null, globalStart: State<any> ): StateTransition[] {
                
@@ -39,52 +40,28 @@ export default class WindowAccumulator extends Accumulator{
         trans.push(new StateTransition(this.findState("CHECK_TEMP")!, this.findState("CHECK_HUMIDITY")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
             
 
-            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as FanConfig;
             
-            const stateVarName = aiConfigRules.open.vars.stateVar;
-            const isOpen = this.isWindowOpen(varHisotry, stateVarName);
+            const stateVarName = aiConfigRules.turnOn.vars.stateVar;
+            const isTurnedOn = this.isTurnedOn(varHisotry, stateVarName);
 
-            if(isOpen){
-                // handle closing logic
-                const maxTemp = aiConfigRules.close.maxTemp.value;
-                const tempSensor = aiConfigRules.close.maxTemp.sensors;                
-
+            if(isTurnedOn){
+                // handle turn off logic
+                const maxTemp = aiConfigRules.turnOff.maxTemp.value;
+                const tempSensor = aiConfigRules.turnOff.maxTemp.sensors;
                 const allSensorsMatchTemp = tempSensor.every(sensor => {
                     const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg[0];
-
-                    // make sure that it is colder outside to avoid warm air coming in
-                    const correctOutSideTemp = !aiConfigRules.close.checkOutsideTemp.value 
-                        || aiConfigRules.close.checkOutsideTemp.sensors
-                        .every(weatherSensor => 
-                            { 
-                                (sensorConfig.getSensor(weatherSensor)!.getStatistics().avg[0] - aiConfigRules.close.checkOutsideTemp.delta) 
-                                > currentAvgTemp 
-                            }
-                    );
-
-                    return currentAvgTemp < maxTemp && correctOutSideTemp;
+                    return currentAvgTemp < maxTemp;
                 });
 
                 return allSensorsMatchTemp;
-            }else{
-                // handle opening logic
-                const minTemp = aiConfigRules.open.minTemp.value;
-                const tempSensor = aiConfigRules.open.minTemp.sensors;
+            }else {
+                // handle turn on logic
+                const minTemp = aiConfigRules.turnOn.minTemp.value;
+                const tempSensor = aiConfigRules.turnOn.minTemp.sensors;
                 const allSensorsMatchTemp = tempSensor.every(sensor => {
                     const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg[0];
-
-                     // make sure that it is colder outside to avoid warm air coming in
-                     const correctOutSideTemp = !aiConfigRules.close.checkOutsideTemp.value 
-                     || aiConfigRules.close.checkOutsideTemp.sensors
-                     .every(weatherSensor => 
-                         { 
-                             (sensorConfig.getSensor(weatherSensor)!.getStatistics().avg[0] + aiConfigRules.close.checkOutsideTemp.delta) 
-                             < currentAvgTemp 
-                         }
-                 );
-
-
-                    return currentAvgTemp > minTemp && correctOutSideTemp;
+                    return currentAvgTemp > minTemp;
                 });
 
                 return allSensorsMatchTemp;
@@ -94,56 +71,54 @@ export default class WindowAccumulator extends Accumulator{
 
         trans.push(new StateTransition(this.findState("CHECK_HUMIDITY")!, this.findState("CHECK_DATE")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
             
-            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as FanConfig;
             
-            const stateVarName = aiConfigRules.open.vars.stateVar;
-            const isOpen = this.isWindowOpen(varHisotry, stateVarName);
+            const stateVarName = aiConfigRules.turnOn.vars.stateVar;
+            const isTurnedOn = this.isTurnedOn(varHisotry, stateVarName);
 
-            if(isOpen){
-                // handle closing logic
-                const maxHumidity = aiConfigRules.close.maxHumidity.value;
-                const humSensors = aiConfigRules.close.maxHumidity.sensors;
+            if(isTurnedOn){
+                // handle turn off logic
+                const maxHumidity = aiConfigRules.turnOff.maxHumidity.value;
+                const humSensors = aiConfigRules.turnOff.maxHumidity.sensors;
                 const allSensorsMatchTemp = humSensors.every(sensor => {
                     const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg[0];
                     return currentAvgHum < maxHumidity;
                 });
-    
+
                 return allSensorsMatchTemp;
             }else{
-                // handle opening logic
-                const minHumidity = aiConfigRules.open.minHumidity.value;
-                const humSensors = aiConfigRules.open.minHumidity.sensors;
+                // handle turn on logic
+                const minHumidity = aiConfigRules.turnOn.minHumidity.value;
+                const humSensors = aiConfigRules.turnOn.minHumidity.sensors;
                 const allSensorsMatchTemp = humSensors.every(sensor => {
                     const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg[0];
                     return currentAvgHum > minHumidity;
                 });
-    
+
                 return allSensorsMatchTemp;
             }
-            
-         
         }));
 
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("TURNING_ON")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
             
             // as current week day as full string
             const currentWeekDay = new Date().getDay();
             const dayString = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][currentWeekDay].toUpperCase();
-            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as WindowConfig;
-            const days = aiConfigRules.open.onlyOnDays.map(day => day.toUpperCase());
+            const aiConfigRules = sensorConfig.getAiRules(this.getType(), this.name) as FanConfig;
+            const days = aiConfigRules.turnOn.onlyOnDays.map(day => day.toUpperCase());
             const open =  days.includes(dayString);
             if(!open) return false;
-            this.open = true;           
-            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "OPEN", data: ""});
-            varHisotry.addVersion(aiConfigRules.open.vars.stateVar, true);
+            this.turnedOn = true;           
+            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "TURNING_ON", data: ""});
+            varHisotry.addVersion(aiConfigRules.turnOn.vars.stateVar, true);
             return true;
         }));
 
         
-        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("CLOSING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+        trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("TURNING_OFF")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
             // windows can be closed every day
-            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "CLOSE", data: ""});
-            this.open = false;
+            accumulatorInputSender.send({name: this.name, type: this.getType(), event: "TURNING_OFF", data: ""});
+            this.turnedOn = false;
             return true;
         }));
 
@@ -180,10 +155,9 @@ export default class WindowAccumulator extends Accumulator{
 
         return trans;
     }
-    private isWindowOpen(varHisotry: VarHistory, stateVarName: string) {
-        const isOpenVarHisory = varHisotry.get(stateVarName) || [];
-        const isOpen = isOpenVarHisory.length > 0 ? isOpenVarHisory[isOpenVarHisory.length - 1] : false;
-        return isOpen;
+    private isTurnedOn(varHisotry: VarHistory, stateVarName: string) {
+        const isOn = varHisotry.getLatestValue(stateVarName, false);
+        return isOn;
     }
 
     buildStates(): State<any>[] {
