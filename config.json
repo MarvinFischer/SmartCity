@@ -6,6 +6,12 @@
 	"rabbitmq_channel": "sensors",
 	"sensors": [
 		{
+			"impl": "ApiWeatherGovAccess",
+			"type_id": "temperature_humidity",
+			"instance_id": "api_0",
+			"station_id": "0682W"
+		},
+		{
 			"impl": "NormallyDistributedDeltaSensor",
 			"type_id": "temperature",
 			"instance_id": "indoor_temperature_0",
