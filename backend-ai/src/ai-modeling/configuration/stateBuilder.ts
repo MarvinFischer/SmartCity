@@ -1,5 +1,8 @@
-import { State, StateTransition } from "../ai-components";
+import { AccumulatorInputSender } from "../../data-exchanger/accumulator_input_sender";
+import { SensorConfig } from "../../data-exchanger/sensor_input_fetcher";
+import { State, StateTransition, VarHistory } from "../ai-components";
 import Accumulator from "./accumulator";
+import FanAccumulator from "./accumulators/fanAccumulator";
 import WindowAccumulator from "./accumulators/windowAccumulator";
 
 export default class StateBuilder {
@@ -20,12 +23,13 @@ export default class StateBuilder {
         const trans = this.buildTransitons(accs, globalStart, buildStates);
         // add global start and end states
         buildStates.push(globalStart);
-        buildStates.push(globalEnd);
+        buildStates.push(globalEnd); 
         return {
             start: globalStart,
             end: globalEnd,
             states: buildStates,
-            transitions: trans
+            transitions: trans,
+            accs: accs
         };
 
     }
@@ -34,7 +38,7 @@ export default class StateBuilder {
         const transitions = [];
         // set start state to first accumulator transition
 
-        let startT = new StateTransition(globalStart, accs[0].getEntryState(), new Map<string, any>(), (state: State<any>, varHisotry: Map<string, any>, sensorConfig: any) => {
+        let startT = new StateTransition(globalStart, accs[0].getEntryState(), new Map<string, any>(), (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
             return true; // always true
         });
 
@@ -71,6 +75,9 @@ export default class StateBuilder {
                 const accData = acc[name];           
                 if (type === "windows"){
                     const accu = new WindowAccumulator(name, globalStart);
+                    accs.push(accu);
+                }else if(type === "fans"){
+                    const accu = new FanAccumulator(name, globalStart);
                     accs.push(accu);
                 }                
             });           

@@ -1,6 +1,7 @@
 import { AccumulatorInputSender } from "../data-exchanger/accumulator_input_sender";
 import { SensorConfig } from "../data-exchanger/sensor_input_fetcher";
 import { Iterations, Model, State, StateTransition } from "./ai-components";
+import Accumulator from "./configuration/accumulator";
 
 class ModelBuilder {
     buildModel(conf: AiConfiguration, sensorConfig: SensorConfig) {
@@ -34,6 +35,7 @@ interface AiConfiguration{
     initState: State<any>;
     initValues: Map<string, any>;
     enableLog: boolean;
+    accumalators: Accumulator[];
 }
 
 export {ModelBuilder, AiConfiguration};

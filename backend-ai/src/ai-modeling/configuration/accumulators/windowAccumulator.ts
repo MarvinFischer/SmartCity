@@ -12,6 +12,9 @@ export default class WindowAccumulator extends Accumulator{
         return {open: this.open};
     }   
 
+    getName(): string {
+        return this.name;
+    }
 
     constructor(name: string, globalStart: State<any>){
         super(name, globalStart);
@@ -41,16 +44,27 @@ export default class WindowAccumulator extends Accumulator{
             const stateVarName = aiConfigRules.open.vars.stateVar;
             const isOpen = this.isWindowOpen(varHisotry, stateVarName);
 
-            if(isOpen) return false;
-            
-            const minTemp = aiConfigRules.open.minTemp.value;
-            const tempSensor = aiConfigRules.open.minTemp.sensors;
-            const allSensorsMatchTemp = tempSensor.every(sensor => {
-                const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg;
-                return currentAvgTemp > minTemp;
-            });
+            if(isOpen){
+                // handle closing logic
+                const maxTemp = aiConfigRules.close.maxTemp.value;
+                const tempSensor = aiConfigRules.close.maxTemp.sensors;
+                const allSensorsMatchTemp = tempSensor.every(sensor => {
+                    const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                    return currentAvgTemp < maxTemp;
+                });
 
-            return allSensorsMatchTemp;
+                return allSensorsMatchTemp;
+            }else{
+                // handle opening logic
+                const minTemp = aiConfigRules.open.minTemp.value;
+                const tempSensor = aiConfigRules.open.minTemp.sensors;
+                const allSensorsMatchTemp = tempSensor.every(sensor => {
+                    const currentAvgTemp = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                    return currentAvgTemp > minTemp;
+                });
+
+                return allSensorsMatchTemp;
+            }
         }));
 
 
@@ -61,16 +75,29 @@ export default class WindowAccumulator extends Accumulator{
             const stateVarName = aiConfigRules.open.vars.stateVar;
             const isOpen = this.isWindowOpen(varHisotry, stateVarName);
 
-            if(isOpen) return false;
+            if(isOpen){
+                // handle closing logic
+                const maxHumidity = aiConfigRules.close.maxHumidity.value;
+                const humSensors = aiConfigRules.close.maxHumidity.sensors;
+                const allSensorsMatchTemp = humSensors.every(sensor => {
+                    const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                    return currentAvgHum < maxHumidity;
+                });
+    
+                return allSensorsMatchTemp;
+            }else{
+                // handle opening logic
+                const minHumidity = aiConfigRules.open.minHumidity.value;
+                const humSensors = aiConfigRules.open.minHumidity.sensors;
+                const allSensorsMatchTemp = humSensors.every(sensor => {
+                    const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg;
+                    return currentAvgHum > minHumidity;
+                });
+    
+                return allSensorsMatchTemp;
+            }
             
-            const minHumidity = aiConfigRules.open.minHumidity.value;
-            const humSensors = aiConfigRules.open.minHumidity.sensors;
-            const allSensorsMatchTemp = humSensors.every(sensor => {
-                const currentAvgHum = sensorConfig.getSensor(sensor)!.getStatistics().avg;
-                return currentAvgHum > minHumidity;
-            });
-
-            return allSensorsMatchTemp;
+         
         }));
 
         trans.push(new StateTransition(this.findState("CHECK_DATE")!, this.findState("OPENING")!, new Map<string, any>(), (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {

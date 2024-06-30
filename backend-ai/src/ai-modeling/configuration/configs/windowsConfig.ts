@@ -10,7 +10,7 @@ export default interface WindowConfig {
 
     close: {
         maxTemp: { value: number, sensors: string[] },
-        maxHumidity: number,
+        maxHumidity: { value: number, sensors: string[] },
         vars: { stateVar: string }
     }
 

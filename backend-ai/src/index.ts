@@ -14,7 +14,7 @@ const configuration = new Configuration();
 
 const modelBuilder = new ModelBuilder();
 
-const aiConfiguration = configuration.configure();
+const aiConfiguration = configuration.aiConfig;
 
 
 
@@ -28,7 +28,9 @@ const sensorConfig = SensorConfig.fromFile(process.env.SENSOR_CONFIG_FILE!);
 const fetcher = new SensorInputFetcher(rabbitConfig, sensorConfig);
 const accumulatorInputSender = new AccumulatorInputSender(rabbitConfig);
 
-const applicationContext = new ApplicationContext(sensorConfig);
+accumulatorInputSender.connect();
+
+const applicationContext = new ApplicationContext(sensorConfig, configuration);
 
 
 // register routes

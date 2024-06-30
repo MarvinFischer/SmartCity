@@ -6,6 +6,11 @@ import StateBuilder from "./configuration/stateBuilder";
 export default class Configuration {
 
     private sb = new StateBuilder();
+    private aiConfiguration : AiConfiguration;
+
+    constructor(){
+        this.aiConfiguration = this.configure();
+    }
 
    
 
@@ -35,18 +40,23 @@ export default class Configuration {
     }
 
 
-    configure() : AiConfiguration  {
+    private configure() : AiConfiguration  {
 
         const build = this.sb.build('sensors-config.json');
 
         return {
             states: build.states,
             transitions: build.transitions,
+            accumalators: build.accs,
             ticker: this.ticker,
             initState: this.initState()!,
             initValues: this.initValues(),
             enableLog: false
         }
+    }
+
+    get aiConfig(){
+        return this.aiConfiguration;
     }
 
 }

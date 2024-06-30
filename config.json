@@ -17,13 +17,23 @@
 		},
 		{
 			"impl": "NormallyDistributedDeltaSensor",
-			"type_id": "huminidity",
+			"type_id": "humidity",
 			"instance_id": "indoor_huminidity_0",
 			"unit": "percent",
 			"val_min": 45,
 			"val_max": 95,
 			"val_init": 55,
 			"variance": 0.25
+		},
+		{
+			"impl": "NormallyDistributedDeltaSensor",
+			"type_id": "humidity",
+			"instance_id": "indoor_huminidity_1",
+			"unit": "percent",
+			"val_min": 47,
+			"val_max": 97,
+			"val_init": 57,
+			"variance": 0.35
 		}
 	],
 	"poll_delay": 1

@@ -19,6 +19,7 @@ export default abstract class Accumulator {
 
     abstract getStateData(): any;
     abstract getType(): string;
+    abstract getName(): string;
     abstract getSubStates(): string[];
     abstract buildTransition(nextAccumulator: Accumulator|null, globalStart: State<any>): StateTransition[];
     abstract buildStates(): State<any>[];

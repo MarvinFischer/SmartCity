@@ -40,14 +40,14 @@ class SensorInputFetcher{
     }
 
     private handleSensorInput(data: string){
+        const supportedTypes = ['temperature', 'humidity'];
         const jsonData = JSON.parse(data);
         const instanceID = jsonData.instance_id;
-        const sensor = this.sensorConfig.getSensor(instanceID);
+        const sensor = this.sensorConfig.getSensor(instanceID);       
         if(sensor){
-            if(sensor.getTypeId() === 'temperature'){
+            if(supportedTypes.findIndex(type => type === sensor.getTypeId()) !== -1){
                 sensor.updateValue(jsonData.value[sensor.getUnit()])
             }
-       //    
         }
     }
 
@@ -70,12 +70,19 @@ class AiRules {
         this.accumalators = accumalators.accumulators;
     }
 
-    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiContextRules | null{
-        console.log(this.accumalators, accumulatorType, accumulatorId);
+    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiContextRules | null{      
         if(!this.accumalators || !this.accumalators[accumulatorType]){
             return null;
         }
         return this.accumalators[accumulatorType][accumulatorId];
+    }
+
+    getAllTypes(){
+        return Object.keys(this.accumalators);
+    }
+
+    getTypeIds(type: string){
+        return Object.keys(this.accumalators[type]);
     }
 }
 
@@ -122,6 +129,20 @@ class SensorConfig{
         return this.aiRules.getAccumulator(accumulatorType,accumulatorId);
     }
 
+    public getAllAccumulatorsIds() : {id: string, type: string}[]{
+        let types =  this.aiRules.getAllTypes();
+
+        let ids: { id: string; type: string; }[] = [];
+
+        types.forEach(type => {
+            this.aiRules.getTypeIds(type).forEach(id => {
+                ids.push({id: id, type: type});
+            });
+        });
+
+        return ids;
+    }
+
 }
 
 class RabbitMQConfig{
@@ -142,5 +163,5 @@ class RabbitMQConfig{
 }
 
 export {
-    SensorInputFetcher, SensorConfig, RabbitMQConfig
+    SensorInputFetcher, SensorConfig, RabbitMQConfig, AccumulatorAiContextRules
 };

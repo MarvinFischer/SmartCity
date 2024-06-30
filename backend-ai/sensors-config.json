@@ -4,10 +4,60 @@
         "typeId": "temperature",
         "instanceId": "indoor_temperature_0",
         "unit": "celsius"
+    },
+    {
+        "typeId": "humidity",
+        "instanceId": "indoor_huminidity_0",
+        "unit": "percent"
+    },
+    {
+        "typeId": "humidity",
+        "instanceId": "indoor_huminidity_1",
+        "unit": "percent"
     }
     ],
     "aiRules": {        
         "accumulators": {
+            "fans": {
+                "fan1": {
+                    "turnOn": {
+                        "minTemp": {
+                            "value": 21,
+                            "sensors": [
+                                "indoor_temperature_0"
+                            ] 
+                        },
+                        "minHumidity": {
+                            "value": 50,
+                            "sensors": [
+                                "indoor_huminidity_0"
+                            ] 
+                        },
+                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+                        "vars": {
+                            "stateVar": "fan1_on"
+                        }
+    
+                    },
+                    "turnOff": {
+                        "maxTemp": {
+                            "value": 20,
+                            "sensors": [
+                                "indoor_temperature_0"
+                            ] 
+                        },
+                        "minHumidity": {
+                            "value": 50,
+                            "sensors": [
+                                "indoor_huminidity_0"
+                            ] 
+                        },
+                        "vars": {
+                            "stateVar": "fan1_on"
+                        }
+                    }
+                }
+            },
             "windows": {               
                 "window1": {
                     "open": {
@@ -36,7 +86,12 @@
                                 "indoor_temperature_0"
                             ] 
                         },
-                        "maxHumidity": 50,
+                        "maxHumidity": {
+                            "value": 60,
+                            "sensors": [
+                                "indoor_huminidity_1"
+                            ] 
+                        },
                         "vars": {
                             "stateVar": "window1_opened"
                         }
@@ -53,7 +108,7 @@
                         "minHumidity": {
                             "value": 50,
                             "sensors": [
-                                "indoor_huminidity_0"
+                                "indoor_huminidity_1"
                             ] 
                         },
                         "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
@@ -69,7 +124,12 @@
                                 "indoor_temperature_0"
                             ] 
                         },
-                        "maxHumidity": 50,
+                        "maxHumidity": {
+                            "value": 60,
+                            "sensors": [
+                                "indoor_huminidity_1"
+                            ] 
+                        },
                         "vars": {
                             "stateVar": "window2_opened"
                         }
