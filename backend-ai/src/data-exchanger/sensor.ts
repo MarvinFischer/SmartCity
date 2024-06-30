@@ -76,6 +76,10 @@ export default class Sensor {
         return this.typeId;
     }
 
+    public getLabels(){
+        return this.labels;
+    }
+
     /**
      * get the instance id
      * @returns the instance id

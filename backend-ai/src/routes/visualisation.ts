@@ -17,7 +17,8 @@ export class VisualisationRoutes {
             return {
                 "instanceId": sensor.getInstanceId(),
                 "typeId": sensor.getTypeId(),
-                "unit": sensor.getUnit()
+                "units": sensor.getUnit(),
+                "labels": sensor.getLabels(),
             }
         });
     res.send(data);
