@@ -1,3 +1,4 @@
+import { SensorConfig } from "../../data-exchanger/sensor_input_fetcher";
 import { State, StateTransition } from "../ai-components";
 
 export default abstract class Accumulator {
@@ -16,6 +17,9 @@ export default abstract class Accumulator {
         this.transitions = this.buildTransition(nextAccumulator, globalStart);
     }
 
+    abstract getStateData(): any;
+    abstract getType(): string;
+    abstract getName(): string;
     abstract getSubStates(): string[];
     abstract buildTransition(nextAccumulator: Accumulator|null, globalStart: State<any>): StateTransition[];
     abstract buildStates(): State<any>[];
@@ -35,6 +39,14 @@ export default abstract class Accumulator {
     public getTransitions(){
 
         return this.transitions;
+    }
+
+    protected getAiRules(sensorConfig: SensorConfig) {
+        const acc = sensorConfig.getAiRules(this.getType(), this.name);
+        if(!acc) return null;
+        const typedAcc = acc[this.getType()];
+        if(!typedAcc) return null;
+        return typedAcc[this.name];
     }
 
 }

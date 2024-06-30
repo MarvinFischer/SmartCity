@@ -1,5 +1,8 @@
 {
 	"rabbitmq_host": "localhost",
+	"rabbitmq_port": 1143,
+	"rabbitmq_user": "admin",
+	"rabbitmq_password": "password",
 	"rabbitmq_channel": "sensors",
 	"sensors": [
 		{
@@ -11,12 +14,32 @@
 		{
 			"impl": "NormallyDistributedDeltaSensor",
 			"type_id": "temperature",
-			"instance_id": "indoor_0",
+			"instance_id": "indoor_temperature_0",
 			"unit": "celsius",
 			"val_min": 15,
 			"val_max": 30,
 			"val_init": 20,
 			"variance": 0.1
+		},
+		{
+			"impl": "NormallyDistributedDeltaSensor",
+			"type_id": "humidity",
+			"instance_id": "indoor_huminidity_0",
+			"unit": "percent",
+			"val_min": 45,
+			"val_max": 95,
+			"val_init": 55,
+			"variance": 0.25
+		},
+		{
+			"impl": "NormallyDistributedDeltaSensor",
+			"type_id": "humidity",
+			"instance_id": "indoor_huminidity_1",
+			"unit": "percent",
+			"val_min": 47,
+			"val_max": 97,
+			"val_init": 57,
+			"variance": 0.35
 		}
 	],
 	"poll_delay": 1

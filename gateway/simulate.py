@@ -76,7 +76,7 @@ if __name__ == '__main__':
 	sensors = [silly_dict[conf_sensor['impl']](**conf_sensor) for conf_sensor in config['sensors']]
 	print("There are", len(sensors), "sensors (out of 4 required).")
 	
-	conn = pika.BlockingConnection(pika.ConnectionParameters(config['rabbitmq_host']))
+	conn = pika.BlockingConnection(pika.ConnectionParameters(host=config['rabbitmq_host'], port=config['rabbitmq_port'], credentials=pika.PlainCredentials(config['rabbitmq_user'], config['rabbitmq_password'])))
 	channel = conn.channel()
 	channel.queue_declare(queue=config['rabbitmq_channel'])
 

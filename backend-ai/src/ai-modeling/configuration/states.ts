@@ -1,7 +1,7 @@
 import { State } from "../ai-components";
 
 export default class STATES {
-    public static readonly START = new State("start", "start");
+    public static readonly START = new State("START", "start");
     public static readonly CHECK_DATE = new State("checkDate", "checkDate");
     public static readonly CHECK_HUMIDITY = new State("checkHumidity", "checkHumidity");
     public static readonly CHECK_TEMPERATURE = new State("checkTemperature", "checkTemperature");

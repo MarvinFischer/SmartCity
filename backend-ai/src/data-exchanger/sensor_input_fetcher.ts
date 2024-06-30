@@ -1,5 +1,6 @@
 import { json } from "body-parser";
 import Sensor from "./sensor";
+import Accumulator from "../ai-modeling/configuration/accumulator";
 
 class SensorInputFetcher{
 
@@ -39,25 +40,65 @@ class SensorInputFetcher{
     }
 
     private handleSensorInput(data: string){
+        const supportedSingleTypes = ['temperature', 'humidity'];
+        const weatherType = "temperature_humidity";
         const jsonData = JSON.parse(data);
         const instanceID = jsonData.instance_id;
-        const sensor = this.sensorConfig.getSensor(instanceID);
+        const sensor = this.sensorConfig.getSensor(instanceID);       
         if(sensor){
-            if(sensor.getTypeId() === 'temperature'){
-                sensor.updateValue(jsonData.value[sensor.getUnit()])
+            if(supportedSingleTypes.findIndex(type => type === sensor.getTypeId()) !== -1){
+                sensor.updateValue(jsonData.value[sensor.getUnit()[0]])
+            }else if(sensor.getTypeId() === weatherType){                
+                const temperature = jsonData.value[sensor.getUnit()[0]];
+                const humidity = jsonData.value[sensor.getUnit()[1]];     
+                sensor.updateValue([temperature, humidity]);     
             }
-       //    
         }
     }
 
 }
 
+interface AccumulatorAiContextRules{
+    [key: string]: any;
+}
+
+interface AccumulatorAiRules{
+    accumulators: {
+        [key: string]: AccumulatorAiContextRules;
+    }
+}
+
+
+class AiRules {
+    private accumalators: {[key: string]: AccumulatorAiContextRules};
+    public constructor(accumalators : AccumulatorAiRules = {accumulators: {} }){
+        this.accumalators = accumalators.accumulators;
+    }
+
+    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiContextRules | null{      
+        if(!this.accumalators || !this.accumalators[accumulatorType]){
+            return null;
+        }
+        return this.accumalators[accumulatorType][accumulatorId];
+    }
+
+    getAllTypes(){
+        return Object.keys(this.accumalators);
+    }
+
+    getTypeIds(type: string){
+        return Object.keys(this.accumalators[type]);
+    }
+}
+
 class SensorConfig{
 
     public readonly sensors: Sensor[];
+    public readonly aiRules: AiRules;
 
-    constructor(sensors: Sensor[]){
+    constructor(sensors: Sensor[], aiRules: AiRules|null = null){
         this.sensors = sensors;
+        this.aiRules = aiRules ?? new AiRules();
     }
 
     /**
@@ -71,18 +112,38 @@ class SensorConfig{
         const data = fs.readFileSync(filePath, 'utf8');
         const jsonData = JSON.parse(data);
         const sensorsData = jsonData.sensors;
+        const aiRulesData = jsonData.aiRules;
 
         const sensors =  sensorsData.map ((sensor: any) => {          
-            return new Sensor(sensor.typeId, sensor.instanceId, sensor.unit);
+            return new Sensor(sensor.typeId, sensor.instanceId, sensor.unit, sensor.label);
         });
+
+        let aiRules =new AiRules(aiRulesData);       
   
 
-        return new SensorConfig(sensors);
+        return new SensorConfig(sensors, aiRules);
     }
 
     public getSensor(instanceId: string){ 
-
         return this.sensors.find(sensor => sensor.getInstanceId() === instanceId);
+    }
+
+    public getAiRules(accumulatorType: string, accumulatorId: string){
+        return this.aiRules.getAccumulator(accumulatorType,accumulatorId);
+    }
+
+    public getAllAccumulatorsIds() : {id: string, type: string}[]{
+        let types =  this.aiRules.getAllTypes();
+
+        let ids: { id: string; type: string; }[] = [];
+
+        types.forEach(type => {
+            this.aiRules.getTypeIds(type).forEach(id => {
+                ids.push({id: id, type: type});
+            });
+        });
+
+        return ids;
     }
 
 }
@@ -105,5 +166,5 @@ class RabbitMQConfig{
 }
 
 export {
-    SensorInputFetcher, SensorConfig, RabbitMQConfig
+    SensorInputFetcher, SensorConfig, RabbitMQConfig, AccumulatorAiContextRules
 };

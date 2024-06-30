@@ -11,6 +11,9 @@ export function registerRoutes(app: Express, appContext: ApplicationContext): vo
 
     app.get('/sensors/info', visualisationRoutes.allSensors.bind(visualisationRoutes));
     app.get('/sensors/:instanceId/stats', visualisationRoutes.getSensorStatistics.bind(visualisationRoutes));
+    app.get('/ai-states/current', visualisationRoutes.getCurrentState.bind(visualisationRoutes));
+    app.get('/accumulators', visualisationRoutes.getAccumulators.bind(visualisationRoutes));
+    app.get('/accumulators/:type/:instanceId', visualisationRoutes.getAccumulator.bind(visualisationRoutes));
 }
 
 
