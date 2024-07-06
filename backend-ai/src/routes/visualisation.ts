@@ -77,5 +77,19 @@ export class VisualisationRoutes {
         res.send({meta: accMeta, state: state});
     }
 
+    public enableAi(req: Request, res: Response) {
+        this.appContext.enable();
+        res.send({
+            state: "enabled"
+        });
+    }
+
+    public disableAi(req: Request, res: Response) {
+        this.appContext.disable();
+        res.send({
+            state: "disabled"
+        });
+    }
+
    
 }

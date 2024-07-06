@@ -1,3 +1,4 @@
+import ApplicationContext from "../applicationContext";
 import { AccumulatorInputSender } from "../data-exchanger/accumulator_input_sender";
 import { SensorConfig } from "../data-exchanger/sensor_input_fetcher";
 import { Iterations, Model, State, StateTransition } from "./ai-components";
@@ -8,7 +9,7 @@ class ModelBuilder {
         return new Model(conf.states, conf.transitions, sensorConfig);
     }
 
-    runModel(conf: AiConfiguration, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender){
+    runModel(conf: AiConfiguration, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender, applicationContext: ApplicationContext){
         // build the model based on the configuration
         let model = this.buildModel(conf, sensorConfig);
 
@@ -23,7 +24,7 @@ class ModelBuilder {
         let iterations = new Iterations(model, conf.initValues, conf.initState, accumulatorInputSender, opts);
 
         // start the ticker
-        conf.ticker(iterations);
+        conf.ticker(iterations, applicationContext);
 
     }
 }
@@ -31,7 +32,7 @@ class ModelBuilder {
 interface AiConfiguration{
     states : State<any>[];
     transitions : StateTransition[];
-    ticker: (iterations: Iterations) => Promise<void>;
+    ticker: (iterations: Iterations, appContext: ApplicationContext) => Promise<void>;
     initState: State<any>;
     initValues: Map<string, any>;
     enableLog: boolean;

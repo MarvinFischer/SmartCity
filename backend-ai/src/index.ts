@@ -43,4 +43,4 @@ app.listen(port, () => {
 fetcher.start();
 
 // start ai model
-modelBuilder.runModel(aiConfiguration, sensorConfig, accumulatorInputSender);
+modelBuilder.runModel(aiConfiguration, sensorConfig, accumulatorInputSender, applicationContext);
