@@ -1,7 +1,10 @@
 <template>
   <q-page class="q-pa-md">
     <h4>Sensors</h4>
-    <div class="sensor-element-grid">
+    <div v-if="isLoading">
+      <q-spinner size="50px"></q-spinner>
+    </div>
+    <div v-else class="sensor-element-grid">     
 
     <template v-for="sensorType in sensorByTypes.keys()" :key="sensorType">
       
@@ -10,23 +13,101 @@
         <q-card>
         <q-card-section>
           <q-card-title>
-           Type: {{ sensorType }} 
+           Type: {{ sensorType }}  ({{ sensorByTypes.get(sensorType)![0].units[sensorValueIndex] }})
           </q-card-title>
         </q-card-section>
-          <q-card-section>
-            <q-card-title>
-              {{ sensLabel }} ({{ sensorByTypes.get(sensorType)![0].units[sensorValueIndex] }})
-            </q-card-title>
-          </q-card-section>
           <q-card-section v-if="sensorsMap.get(sensorByTypes.get(sensorType)![0].instanceId) != null">      
             
             <BoxPlot 
             :data="sensorByTypes.get(sensorType)!" 
             :stats="getStats(sensorType)!"
             :data-index="sensorValueIndex"></BoxPlot>
-          </q-card-section>
+          </q-card-section>         
           
         </q-card>
+
+        <q-card class="q-my-sm"
+        v-for="(si) in sensorByTypes.get(sensorType)" :key="si.instanceId"> 
+        <q-card-section>
+          <q-card-title>
+           {{ si.instanceId }}
+          </q-card-title>          
+        </q-card-section>
+          <div class="row">
+            <div class="col">
+              <q-card-section>
+                <q-card-title>
+                  {{ si.labels[sensorValueIndex] }}
+                </q-card-title>
+                <q-card-section>
+                  <q-list>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label>
+                          Min
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ sensorsMap.get(si.instanceId)!.min[sensorValueIndex].toFixed(2) }} {{getUnit(si.units[sensorValueIndex])}}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label>
+                          Q1
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ sensorsMap.get(si.instanceId)!.q1[sensorValueIndex].toFixed(2) }} {{getUnit(si.units[sensorValueIndex])}}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label>
+                          Median
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ sensorsMap.get(si.instanceId)!.median[sensorValueIndex].toFixed(2) }} {{getUnit(si.units[sensorValueIndex])}}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label>
+                          Q3
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ sensorsMap.get(si.instanceId)!.q3[sensorValueIndex].toFixed(2) }} {{getUnit(si.units[sensorValueIndex])}}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label>
+                          Max
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ sensorsMap.get(si.instanceId)!.max[sensorValueIndex].toFixed(2) }} {{getUnit(si.units[sensorValueIndex])}}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-card-section>
+              </q-card-section>
+            </div>
+          </div>
+        </q-card>
+
         </div>    
 
     </template>
@@ -44,10 +125,13 @@
 }
 .item {
   display: flex;
+  flex-direction: column;
   width: 100%;
   background-color: #f5f5f5;
-  justify-content: center;
-  align-items: center;
+
+  overflow: scroll;
+  border: 1px solid #e0e0e0;
+  height: 750px;
 
   .q-card{
     width: 100%;  
@@ -67,13 +151,14 @@ export default defineComponent({
   name: 'SensosPage',
   components: { BoxPlot },
   mounted() {
-
+    this.isLoading = true;
     BackendApi.getSensors()
       .then((response) => {
         this.sensorInfos = response;
         this.sensorsMap.clear();
         this.sensorByTypes.clear();
        
+        var counter = response.length;
 
         response.forEach((sensorInfo) => {
 
@@ -90,6 +175,11 @@ export default defineComponent({
             })
             .catch((error) => {
               console.log(error);
+            }).finally(() => {
+              counter--;             
+              if (counter === 0) {
+                this.isLoading = false;
+              }
             });
           
         });
@@ -100,6 +190,14 @@ export default defineComponent({
       });
   },
   methods: {
+    getUnit(unit: string) {
+      if (unit === 'celsius') {
+        return '°C';
+      }else if (unit === 'percent') {
+        return '%';
+      }
+      return unit;
+    },
     getStats(type: string) {
       if(!this.sensorByTypes.has(type)) {
         return null;
@@ -118,7 +216,8 @@ export default defineComponent({
     const sensorInfos : Ref<SensorsInfo | null> = ref(null);     
     const sensorsMap = ref(new Map<string, SensorsStatistics>());
     const sensorByTypes = ref(new Map<string, SensorInfo[]>());
-    return { sensorInfos, sensorsMap, sensorByTypes };
+    const isLoading = ref(true);
+    return { sensorInfos, sensorsMap, sensorByTypes, isLoading };
   }
 });
 </script>

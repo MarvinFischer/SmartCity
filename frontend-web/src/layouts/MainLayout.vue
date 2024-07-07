@@ -5,10 +5,10 @@
    
 
         <q-toolbar-title>
-          Quasar App
+          Smart City
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>V1.0</div>
       </q-toolbar>
     </q-header>
 

@@ -1,7 +1,6 @@
 <template>
     <div>    
-      {{ stats }}
-      <canvas ref="chartRef" width="400" height="400"></canvas>
+      <canvas ref="chartRef" width="490" height="490"></canvas>
     </div>
   </template>
   
@@ -60,7 +59,8 @@ import { SensorInfo, SensorsStatistics } from 'src/utils/apiResponses';
           this.chart = new Chart(ctx, {
             type: 'boxplot',
             data: data,
-           
+            options: {
+            },           
           });
 
         }
