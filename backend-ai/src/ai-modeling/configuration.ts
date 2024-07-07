@@ -2,6 +2,7 @@ import { Iterations, State, StateTransition } from "./ai-components";
 import STATES from "./configuration/states";
 import { AiConfiguration } from "./modelBuilder";
 import StateBuilder from "./configuration/stateBuilder";
+import ApplicationContext from "../applicationContext";
 
 export default class Configuration {
 
@@ -11,6 +12,7 @@ export default class Configuration {
     constructor(){
         this.aiConfiguration = this.configure();
     }
+
 
    
 
@@ -29,11 +31,15 @@ export default class Configuration {
         return new Map<string, any>();
     }
 
-    private ticker(iterations: Iterations) : Promise<void> {
+    
+
+    private ticker(iterations: Iterations, appContext: ApplicationContext) : Promise<void> {
      
         return new Promise((resolve) => {
             setInterval(() => {
-                iterations.runNextIteration();
+                if(appContext.isEnabled){
+                    iterations.runNextIteration();
+                }
             }, 1000 )
         });
 

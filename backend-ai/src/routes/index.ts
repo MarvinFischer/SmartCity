@@ -14,6 +14,8 @@ export function registerRoutes(app: Express, appContext: ApplicationContext): vo
     app.get('/ai-states/current', visualisationRoutes.getCurrentState.bind(visualisationRoutes));
     app.get('/accumulators', visualisationRoutes.getAccumulators.bind(visualisationRoutes));
     app.get('/accumulators/:type/:instanceId', visualisationRoutes.getAccumulator.bind(visualisationRoutes));
+    app.post('/ai-states/enable', visualisationRoutes.enableAi.bind(visualisationRoutes));
+    app.post('/ai-states/disable', visualisationRoutes.disableAi.bind(visualisationRoutes));
 }
 
 
