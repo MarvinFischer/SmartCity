@@ -1,6 +1,6 @@
 import { json } from "body-parser";
 import Sensor from "./sensor";
-import Accumulator from "../ai-modeling/configuration/accumulator";
+import Actuator from "../ai-modeling/configuration/actuator";
 
 class SensorInputFetcher{
 
@@ -58,28 +58,28 @@ class SensorInputFetcher{
 
 }
 
-interface AccumulatorAiContextRules{
+interface ActuatorAiContextRules{
     [key: string]: any;
 }
 
-interface AccumulatorAiRules{
-    accumulators: {
-        [key: string]: AccumulatorAiContextRules;
+interface ActuatorAiRules{
+    actuators: {
+        [key: string]: ActuatorAiContextRules;
     }
 }
 
 
 class AiRules {
-    private accumalators: {[key: string]: AccumulatorAiContextRules};
-    public constructor(accumalators : AccumulatorAiRules = {accumulators: {} }){
-        this.accumalators = accumalators.accumulators;
+    private accumalators: {[key: string]: ActuatorAiContextRules};
+    public constructor(accumalators : ActuatorAiRules = {actuators: {} }){
+        this.accumalators = accumalators.actuators;
     }
 
-    getAccumulator(accumulatorType: string, accumulatorId: string): AccumulatorAiContextRules | null{      
-        if(!this.accumalators || !this.accumalators[accumulatorType]){
+    getActuator(actuatorType: string, actuatorId: string): ActuatorAiContextRules | null{      
+        if(!this.accumalators || !this.accumalators[actuatorType]){
             return null;
         }
-        return this.accumalators[accumulatorType][accumulatorId];
+        return this.accumalators[actuatorType][actuatorId];
     }
 
     getAllTypes(){
@@ -128,11 +128,11 @@ class SensorConfig{
         return this.sensors.find(sensor => sensor.getInstanceId() === instanceId);
     }
 
-    public getAiRules(accumulatorType: string, accumulatorId: string){
-        return this.aiRules.getAccumulator(accumulatorType,accumulatorId);
+    public getAiRules(actuatorType: string, actuatorId: string){
+        return this.aiRules.getActuator(actuatorType,actuatorId);
     }
 
-    public getAllAccumulatorsIds() : {id: string, type: string}[]{
+    public getAllActuatorsIds() : {id: string, type: string}[]{
         let types =  this.aiRules.getAllTypes();
 
         let ids: { id: string; type: string; }[] = [];
@@ -166,5 +166,5 @@ class RabbitMQConfig{
 }
 
 export {
-    SensorInputFetcher, SensorConfig, RabbitMQConfig, AccumulatorAiContextRules
+    SensorInputFetcher, SensorConfig, RabbitMQConfig, ActuatorAiContextRules
 };

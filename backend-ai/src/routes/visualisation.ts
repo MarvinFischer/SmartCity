@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import ApplicationContext from '../applicationContext';
-import { AccumulatorAiContextRules } from '../data-exchanger/sensor_input_fetcher';
+import { ActuatorAiContextRules } from '../data-exchanger/sensor_input_fetcher';
 
 
 export class VisualisationRoutes {
@@ -49,16 +49,16 @@ export class VisualisationRoutes {
         res.send(data);
     }
 
-    public getAccumulators(req: Request, res: Response) {
-        const accs  = this.appContext.sensorConfig.getAllAccumulatorsIds();
+    public getActuators(req: Request, res: Response) {
+        const accs  = this.appContext.sensorConfig.getAllActuatorsIds();
         if(!accs){
-            res.status(404).send("Accumulators not found");
+            res.status(404).send("Actuators not found");
             return;
         }
-        res.send({accumulators: accs});
+        res.send({actuators: accs});
     }
 
-    public getAccumulator(req: Request, res: Response) {
+    public getActuator(req: Request, res: Response) {
         const type = req.params.type;
         const instanceId = req.params.instanceId;
 
@@ -67,7 +67,7 @@ export class VisualisationRoutes {
         const accMeta =  this.appContext.sensorConfig.getAiRules(type, instanceId);
 
         if(!accMeta){
-            res.status(404).send("Accumulator not found");
+            res.status(404).send("Actuator not found");
             return;
         }
 
@@ -77,17 +77,43 @@ export class VisualisationRoutes {
         res.send({meta: accMeta, state: state});
     }
 
+    public setActuatorState(req: Request, res: Response) {
+        const type = req.params.type;
+        const instanceId = req.params.instanceId;
+        const state = req.body.state;
+
+        const accs = this.appContext.configuration.aiConfig.accumalators;
+        const accState = accs.find(acc => acc.getType() === type && acc.getName() === instanceId);
+
+        if(!accState){
+            res.status(404).send("Actuator not found");
+            return;
+        }
+
+        accState.setStateData(state);
+        res.send({state: "ok"});
+    }
+
     public enableAi(req: Request, res: Response) {
         this.appContext.enable();
         res.send({
-            state: "enabled"
+            state: "enabled",
+            iterationState: this.appContext.iterationState
         });
     }
 
     public disableAi(req: Request, res: Response) {
         this.appContext.disable();
         res.send({
-            state: "disabled"
+            state: "disabled",
+            iterationState: this.appContext.iterationState
+        });
+    }
+
+    public getAiStatus(req: Request, res: Response) {
+        res.send({
+            state: this.appContext.isEnabled ? "enabled" : "disabled",
+            iterationState: this.appContext.iterationState
         });
     }
 

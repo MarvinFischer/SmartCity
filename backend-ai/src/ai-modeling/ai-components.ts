@@ -1,4 +1,4 @@
-import { AccumulatorInputSender } from "../data-exchanger/accumulator_input_sender";
+import { ActuatorInputSender } from "../data-exchanger/actuator_input_sender";
 import { SensorConfig } from "../data-exchanger/sensor_input_fetcher";
 
 class State<ValueType> {
@@ -44,10 +44,10 @@ class StateTransition{
     private _start : State<any>;
     private _end : State<any>;
     private _newVars = new Map<string, any>();
-    private _condition : (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => boolean;
+    private _condition : (state: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, actuatorInputSender: ActuatorInputSender) => boolean;
 
 
-    constructor(start: State<any>, end: State<any>, newVars: Map<string, any>, condition: (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => boolean) {
+    constructor(start: State<any>, end: State<any>, newVars: Map<string, any>, condition: (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, actuatorInputSender: ActuatorInputSender) => boolean) {
         this._start = start;
         this._end = end;
         this._newVars = newVars;
@@ -66,8 +66,8 @@ class StateTransition{
         return this._newVars;
     }
     
-    public resolveCondition(varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) {
-        return this._condition(this.start, varHisotry, sensorConfig, accumulatorInputSender);
+    public resolveCondition(varHisotry: VarHistory, sensorConfig: SensorConfig, actuatorInputSender: ActuatorInputSender) {
+        return this._condition(this.start, varHisotry, sensorConfig, actuatorInputSender);
     }
 }
 
@@ -214,13 +214,13 @@ class Iterations{
 
     private _logEnabled = false;
 
-    private _accumulatorInputSender: AccumulatorInputSender;
+    private _actuatorInputSender: ActuatorInputSender;
 
-    constructor(model: Model, initValues: Map<string, any>, initState: State<any>, accumulatorInputSender: AccumulatorInputSender, options?: any){
+    constructor(model: Model, initValues: Map<string, any>, initState: State<any>, actuatorInputSender: ActuatorInputSender, options?: any){
         this._model = model;
         this.initVarHistory(initValues);
         this._stateHistory.push(initState);
-        this._accumulatorInputSender = accumulatorInputSender;
+        this._actuatorInputSender = actuatorInputSender;
         if (options && options.enableLog !== undefined) {
             this._logEnabled = options.enableLog;
         }
@@ -253,6 +253,10 @@ class Iterations{
     get varHistory() {
         return this._varHistory;
     }
+
+    get stateHistory() {
+        return this._stateHistory;
+    }
     
     private createLogEntry(){
         // current state
@@ -282,7 +286,7 @@ class Iterations{
        // get possible transitions
         let possibleTransitions = this._model.transitions.filter(transition => transition.start.name === this._stateHistory[this._stateHistory.length - 1].name);
         // find the first transition that resolves to true
-        let resolvedTransition = possibleTransitions.find(transition => transition.resolveCondition(this._varHistory, this._model.sensors, this._accumulatorInputSender));
+        let resolvedTransition = possibleTransitions.find(transition => transition.resolveCondition(this._varHistory, this._model.sensors, this._actuatorInputSender));
         // set the new state
         if(resolvedTransition){
             this._stateHistory.push(resolvedTransition.end);

@@ -1,9 +1,9 @@
-import { AccumulatorInputSender } from "../../data-exchanger/accumulator_input_sender";
+import { ActuatorInputSender } from "../../data-exchanger/actuator_input_sender";
 import { SensorConfig } from "../../data-exchanger/sensor_input_fetcher";
 import { State, StateTransition, VarHistory } from "../ai-components";
-import Accumulator from "./accumulator";
-import FanAccumulator from "./accumulators/fanAccumulator";
-import WindowAccumulator from "./accumulators/windowAccumulator";
+import Actuator from "./actuator";
+import FanActuator from "./actuators/fanActuator";
+import WindowActuator from "./actuators/windowActuator";
 
 export default class StateBuilder {
     constructor() {
@@ -14,11 +14,11 @@ export default class StateBuilder {
         const data = fs.readFileSync(sensorConfigPath, 'utf8');
         const jsonData = JSON.parse(data);
         
-        // read ai rules and get accumulators    
+        // read ai rules and get Actuators    
        
         const globalStart = new State("START", "START");
         const globalEnd = new State("END", "END");
-        const accs = this.getAccumulator(jsonData, globalStart);
+        const accs = this.getActuator(jsonData, globalStart);
         const buildStates = this.buildStates(accs);
         const trans = this.buildTransitons(accs, globalStart, buildStates);
         // add global start and end states
@@ -34,11 +34,11 @@ export default class StateBuilder {
 
     }
 
-    private buildTransitons(accs: Accumulator[], globalStart: State<any>, states: State<any>[]) {
+    private buildTransitons(accs: Actuator<any>[], globalStart: State<any>, states: State<any>[]) {
         const transitions = [];
-        // set start state to first accumulator transition
+        // set start state to first Actuator transition
 
-        let startT = new StateTransition(globalStart, accs[0].getEntryState(), new Map<string, any>(), (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, accumulatorInputSender: AccumulatorInputSender) => {
+        let startT = new StateTransition(globalStart, accs[0].getEntryState(), new Map<string, any>(), (start: State<any>, varHisotry: VarHistory, sensorConfig: SensorConfig, actuatorInputSender: ActuatorInputSender) => {
             return true; // always true
         });
 
@@ -46,7 +46,7 @@ export default class StateBuilder {
         for (let i = 0; i < accs.length; i++){
             const acc = accs[i];
             const nextAcc = i < accs.length - 1 ? accs[i+1] : null;
-            acc.setNextAccumulator(nextAcc, globalStart);
+            acc.setNextActuator(nextAcc, globalStart);
             transitions.push(acc.getTransitions());
         }
         return transitions.flat();
@@ -54,7 +54,7 @@ export default class StateBuilder {
 
 
 
-    private buildStates(accs: Accumulator[]){
+    private buildStates(accs: Actuator<any>[]){
         return accs.map(acc => {
             return acc.buildStates();
         }).flatMap(states => states);
@@ -63,21 +63,21 @@ export default class StateBuilder {
 
     }
 
-    private getAccumulator(jsonData: any, globalStart: State<any>) : Accumulator[]{
+    private getActuator(jsonData: any, globalStart: State<any>) : Actuator<any>[]{
         const aiRules = jsonData.aiRules;
-        const accumulators = aiRules.accumulators;
-        const types = Object.keys(accumulators);
-        const accs : Accumulator[] = [];
+        const actuators = aiRules.actuators;
+        const types = Object.keys(actuators);
+        const accs : Actuator<any>[] = [];
         types.forEach(type => {
-            const acc = accumulators[type];
+            const acc = actuators[type];
             const names = Object.keys(acc);            
             names.forEach(name => {
                 const accData = acc[name];           
                 if (type === "windows"){
-                    const accu = new WindowAccumulator(name, globalStart);
+                    const accu = new WindowActuator(name, globalStart);
                     accs.push(accu);
                 }else if(type === "fans"){
-                    const accu = new FanAccumulator(name, globalStart);
+                    const accu = new FanActuator(name, globalStart);
                     accs.push(accu);
                 }                
             });           

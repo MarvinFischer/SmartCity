@@ -18,7 +18,7 @@
 			"unit": "celsius",
 			"val_min": 15,
 			"val_max": 30,
-			"val_init": 20,
+			"val_init": 16,
 			"variance": 0.1
 		},
 		{
