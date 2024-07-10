@@ -20,13 +20,13 @@ export class SensorsInfo extends Array<SensorInfo> {
 }
 
 
-export interface AccumulatorListItem {
+export interface ActuatorListItem {
     type: string;
     id: string;
 }
 
-export interface AccumulatorList {
-    accumulators: AccumulatorListItem[];
+export interface ActuatorList {
+    actuators: ActuatorListItem[];
 }
 
 export interface WindowMeta{
@@ -108,7 +108,7 @@ export interface FanState {
     turnedOn: boolean;
 }
 
-export interface AccumulatorStateResponse<MetaType, StateType> {
+export interface ActuatorStateResponse<MetaType, StateType> {
     meta: MetaType;
     state: StateType;
 }

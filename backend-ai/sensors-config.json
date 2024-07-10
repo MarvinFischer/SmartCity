@@ -1,178 +1,178 @@
 {
-    "sensors": [
-    {
-        "typeId": "temperature",
-        "instanceId": "indoor_temperature_0",
-        "unit": "celsius",
-        "label": "temperature"
-    },
-    {
-        "typeId": "humidity",
-        "instanceId": "indoor_huminidity_0",
-        "unit": "percent",
-        "label": "humidity"
-    },
-    {
-        "typeId": "humidity",
-        "instanceId": "indoor_huminidity_1",
-        "unit": "percent",
-        "label": "humidity"
-    },
-    {
-        "typeId": "temperature_humidity",
-        "instanceId": "api_0",
-        "unit": "celsius,percent",
-        "label": "temperature,humidity"
-    }
-    ],
-    "aiRules": {        
-        "accumulators": {
-            "fans": {
-                "fan1": {
-                    "turnOn": {
-                        "minTemp": {
-                            "value": 21,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },                        
-                        "minHumidity": {
-                            "value": 50,
-                            "sensors": [
-                                "indoor_huminidity_0"
-                            ] 
-                        },
-                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                        "vars": {
-                            "stateVar": "fan1_on"
-                        }
-    
-                    },
-                    "turnOff": {
-                        "maxTemp": {
-                            "value": 20,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },
-                        "minHumidity": {
-                            "value": 50,
-                            "sensors": [
-                                "indoor_huminidity_0"
-                            ] 
-                        },
-                        "vars": {
-                            "stateVar": "fan1_on"
-                        }
-                    }
-                }
+  "sensors": [
+  {
+    "typeId": "temperature",
+    "instanceId": "indoor_temperature_0",
+    "unit": "celsius",
+    "label": "temperature"
+  },
+  {
+    "typeId": "humidity",
+    "instanceId": "indoor_huminidity_0",
+    "unit": "percent",
+    "label": "humidity"
+  },
+  {
+    "typeId": "humidity",
+    "instanceId": "indoor_huminidity_1",
+    "unit": "percent",
+    "label": "humidity"
+  },
+  {
+    "typeId": "temperature_humidity",
+    "instanceId": "api_0",
+    "unit": "celsius,percent",
+    "label": "temperature,humidity"
+  }
+  ],
+  "aiRules": {    
+    "actuators": {
+      "fans": {
+        "fan1": {
+          "turnOn": {
+            "minTemp": {
+              "value": 21,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },            
+            "minHumidity": {
+              "value": 50,
+              "sensors": [
+                "indoor_huminidity_0"
+              ] 
             },
-            "windows": {               
-                "window1": {
-                    "open": {
-                        "minTemp": {
-                            "value": 21,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },
-                        "minHumidity": {
-                            "value": 50,
-                            "sensors": [
-                                "indoor_huminidity_0"
-                            ] 
-                        },
-                        "checkOutsideTemp":{
-                            "value": true,
-                            "sensors": [
-                                "api_0"
-                            ],
-                            "delta": 2
-                        },
-                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                        "vars": {
-                            "stateVar": "window1_opened"
-                        }
-    
-                    },
-                    "close": {
-                        "maxTemp": {
-                            "value": 20,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },
-                        "maxHumidity": {
-                            "value": 60,
-                            "sensors": [
-                                "indoor_huminidity_1"
-                            ] 
-                        },
-                        "checkOutsideTemp":{
-                            "value": true,
-                            "sensors": [
-                                "api_0"
-                            ],
-                            "delta": 2
-                        },
-                        "vars": {
-                            "stateVar": "window1_opened"
-                        }
-                    }
-                },
-                "window2": {
-                    "open": {
-                        "minTemp": {
-                            "value": 21,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },
-                        "minHumidity": {
-                            "value": 50,
-                            "sensors": [
-                                "indoor_huminidity_1"
-                            ] 
-                        },
-                        "checkOutsideTemp":{
-                            "value": true,
-                            "sensors": [
-                                "api_0"
-                            ],
-                            "delta": 2
-                        },
-                        "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                        "vars": {
-                            "stateVar": "window2_opened"
-                        }
-    
-                    },
-                    "close": {
-                        "maxTemp": {
-                            "value": 20,
-                            "sensors": [
-                                "indoor_temperature_0"
-                            ] 
-                        },
-                        "maxHumidity": {
-                            "value": 60,
-                            "sensors": [
-                                "indoor_huminidity_1"
-                            ] 
-                        },
-                        "checkOutsideTemp":{
-                            "value": true,
-                            "sensors": [
-                                "api_0"
-                            ],
-                            "delta": 2
-                        },
-                        "vars": {
-                            "stateVar": "window2_opened"
-                        }
-                    }
-                }
+            "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+            "vars": {
+              "stateVar": "fan1_on"
             }
+  
+          },
+          "turnOff": {
+            "maxTemp": {
+              "value": 20,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },
+            "maxHumidity": {
+              "value": 50,
+              "sensors": [
+                "indoor_huminidity_0"
+              ] 
+            },
+            "vars": {
+              "stateVar": "fan1_on"
+            }
+          }
         }
+      },
+      "windows": {         
+        "window1": {
+          "open": {
+            "minTemp": {
+              "value": 21,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },
+            "minHumidity": {
+              "value": 50,
+              "sensors": [
+                "indoor_huminidity_0"
+              ] 
+            },
+            "checkOutsideTemp":{
+              "value": true,
+              "sensors": [
+                "api_0"
+              ],
+              "delta": 2
+            },
+            "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+            "vars": {
+              "stateVar": "window1_opened"
+            }
+  
+          },
+          "close": {
+            "maxTemp": {
+              "value": 20,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },
+            "maxHumidity": {
+              "value": 60,
+              "sensors": [
+                "indoor_huminidity_0"
+              ] 
+            },
+            "checkOutsideTemp":{
+              "value": true,
+              "sensors": [
+                "api_0"
+              ],
+              "delta": 2
+            },
+            "vars": {
+              "stateVar": "window1_opened"
+            }
+          }
+        },
+        "window2": {
+          "open": {
+            "minTemp": {
+              "value": 21,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },
+            "minHumidity": {
+              "value": 50,
+              "sensors": [
+                "indoor_huminidity_1"
+              ] 
+            },
+            "checkOutsideTemp":{
+              "value": true,
+              "sensors": [
+                "api_0"
+              ],
+              "delta": 2
+            },
+            "onlyOnDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+            "vars": {
+              "stateVar": "window2_opened"
+            }
+  
+          },
+          "close": {
+            "maxTemp": {
+              "value": 20,
+              "sensors": [
+                "indoor_temperature_0"
+              ] 
+            },
+            "maxHumidity": {
+              "value": 60,
+              "sensors": [
+                "indoor_huminidity_1"
+              ] 
+            },
+            "checkOutsideTemp":{
+              "value": true,
+              "sensors": [
+                "api_0"
+              ],
+              "delta": 2
+            },
+            "vars": {
+              "stateVar": "window2_opened"
+            }
+          }
+        }
+      }
     }
+  }
 }

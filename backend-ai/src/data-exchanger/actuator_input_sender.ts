@@ -1,8 +1,8 @@
 import { RabbitMQConfig } from "./sensor_input_fetcher";
 
-class AccumulatorInputSender {
+class ActuatorInputSender {
 
-    private static readonly QUEUE = 'accumulators';
+    private static readonly QUEUE = 'actuators';
 
     private channel : any;
 
@@ -17,7 +17,7 @@ class AccumulatorInputSender {
 
     public connect(){
         const amqp = require('amqplib/callback_api');
-        const self : AccumulatorInputSender = this;
+        const self : ActuatorInputSender = this;
         amqp.connect(this.rabbitConfig.ampqString, (error: any, connection: any) => {
             if (error) {
                 throw error;
@@ -26,7 +26,7 @@ class AccumulatorInputSender {
                 if (error) {
                     throw error;
                 }
-                channel.assertQueue(AccumulatorInputSender.QUEUE, {
+                channel.assertQueue(ActuatorInputSender.QUEUE, {
                     durable: false
                 });        
                 self.channel = channel;                
@@ -38,16 +38,19 @@ class AccumulatorInputSender {
      * sends the data to the rabbitmq server
      * @param data the data to send
      */
-    public send(data: AccumulatorExchangeData){
-        this.channel.sendToQueue(AccumulatorInputSender.QUEUE, Buffer.from(JSON.stringify(data)));
+    public send(data: ActuatorsExchangeData){
+        this.channel.sendToQueue(ActuatorInputSender.QUEUE, Buffer.from(JSON.stringify(data)));
     }
 }
 
-interface AccumulatorExchangeData{
+interface ActuatorsExchangeData{
     type: string;
     name: string;
     event: string;
     data: string;
 }
 
-export {AccumulatorInputSender, AccumulatorExchangeData};
+export {
+    ActuatorInputSender, 
+    ActuatorsExchangeData
+};

@@ -1,7 +1,7 @@
 import { SensorConfig } from "../../data-exchanger/sensor_input_fetcher";
 import { State, StateTransition } from "../ai-components";
 
-export default abstract class Accumulator {
+export default abstract class Actuator<StateDataType> {
 
     protected states: State<any>[];
     protected transitions: StateTransition[];
@@ -13,15 +13,16 @@ export default abstract class Accumulator {
         this.transitions = this.buildTransition(null, globalStart);
     }
 
-    public setNextAccumulator(nextAccumulator: Accumulator|null, globalStart: State<any>){
-        this.transitions = this.buildTransition(nextAccumulator, globalStart);
+    public setNextActuator(nextActuator: Actuator<any>|null, globalStart: State<any>){
+        this.transitions = this.buildTransition(nextActuator, globalStart);
     }
 
-    abstract getStateData(): any;
+    abstract getStateData(): StateDataType;
+    abstract setStateData(data: StateDataType): void;
     abstract getType(): string;
     abstract getName(): string;
     abstract getSubStates(): string[];
-    abstract buildTransition(nextAccumulator: Accumulator|null, globalStart: State<any>): StateTransition[];
+    abstract buildTransition(nextActuator: Actuator<any>|null, globalStart: State<any>): StateTransition[];
     abstract buildStates(): State<any>[];
     abstract entry(): string;
     abstract exit(): string;

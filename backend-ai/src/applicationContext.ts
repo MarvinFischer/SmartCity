@@ -6,6 +6,7 @@ export default class ApplicationContext {
     private _sensorConfig: SensorConfig;
     private _configuration: Configuration;
     private _isEnabled: boolean = true;
+    public iterationState = "";
 
     constructor(sensorConfig: SensorConfig, configuration: Configuration){
         this._sensorConfig = sensorConfig;
@@ -19,6 +20,7 @@ export default class ApplicationContext {
     public disable(){
         this._isEnabled = false;
     }
+
 
     get sensorConfig(){
         return this._sensorConfig;

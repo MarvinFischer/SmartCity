@@ -1,4 +1,4 @@
-import { AccumulatorList, AccumulatorStateResponse, AiStateResponse, SensorsInfo, SensorsStatistics } from './apiResponses';
+import { ActuatorList, ActuatorStateResponse, AiStateResponse, SensorsInfo, SensorsStatistics } from './apiResponses';
 
 export class BackendApi{
     
@@ -12,20 +12,20 @@ export class BackendApi{
         .then(response => response.json());
     }
 
-    public static getAccumulators() : Promise<AccumulatorList> {
-        return fetch('/api/accumulators')
+    public static getActuators() : Promise<ActuatorList> {
+        return fetch('/api/actuators')
         .then(response => response.json());
     }
 
-    public static getAccumulator(type: string, instanceId: string) : Promise<AccumulatorStateResponse<any, any>> {
-        return fetch(`/api/accumulators/${type}/${instanceId}`)
+    public static getActuator(type: string, instanceId: string) : Promise<ActuatorStateResponse<any, any>> {
+        return fetch(`/api/actuators/${type}/${instanceId}`)
         .then(response => response.json());
     }
 
-    public static setAccumulatorState(type: string, instanceId: string, state: any) : Promise<AccumulatorStateResponse<any, any>> {
+    public static setActuatorState(type: string, instanceId: string, state: any) : Promise<ActuatorStateResponse<any, any>> {
         const header = new Headers();
         header.append('Content-Type', 'application/json');
-        return fetch(`/api/accumulators/${type}/${instanceId}/state`, {method: 'POST', body: JSON.stringify({state: state}), headers: header}) 
+        return fetch(`/api/actuators/${type}/${instanceId}/state`, {method: 'POST', body: JSON.stringify({state: state}), headers: header}) 
         .then(response => response.json());
     }
 

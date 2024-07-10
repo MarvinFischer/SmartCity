@@ -36,8 +36,9 @@ export default class Configuration {
     private ticker(iterations: Iterations, appContext: ApplicationContext) : Promise<void> {
      
         return new Promise((resolve) => {
-            setInterval(() => {
-                if(appContext.isEnabled){
+            setInterval(() => {               
+                appContext.iterationState = iterations.stateHistory[iterations.stateHistory.length - 1].name;
+                if(appContext.isEnabled){                    
                     iterations.runNextIteration();
                 }
             }, 1000 )
